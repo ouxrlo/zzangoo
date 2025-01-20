@@ -1,0 +1,33 @@
+{% extends 'base.html' %}  
+
+{% block content %}
+    <h1>Post List</h1>
+    
+    
+    <ul>
+        {% for post in page_obj.object_list %}
+            <li>
+                <a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
+                <p>{{ post.content|slice:":100" }}...</p>
+                <p>writer: {{ post.author.username }} | Date: {{ post.created_at }}</p>
+            </li>
+        {% empty %}
+            <li>No Post.</li>
+        {% endfor %}
+    </ul>
+
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; 첫 페이지</a>
+            <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+        {% endif %}
+        
+        <span>페이지 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">다음</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">마지막 페이지 &raquo;</a>
+        {% endif %}
+    </div>
+{% endblock %}
