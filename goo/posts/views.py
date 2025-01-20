@@ -1,6 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .models import Post
+from .forms import PostForm
+from .models import Post, get_user_model
 
 
 def post_list(request):
@@ -16,3 +17,16 @@ def post_list(request):
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     return render(request, "posts/post_detail.html", {"post": post})
+
+
+def post_create(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = get_user_model().objects.get(id=request.user.id)
+            post.save()
+            return redirect("posts:post_list")
+    else:
+        form = PostForm()
+    return render(request, "posts/post_form.html", {"form": form})
