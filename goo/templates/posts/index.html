@@ -2,11 +2,9 @@
 {% load static %}
 
 {% block content %}
-    <h1>Welcome to My World </h1>
-
+    <h1>Welcome to My World</h1>
+    <p>home page.</p>
     <img src="{% static 'images/zz.jpeg' %}" alt="Logo">
     
-    <div>
-        <a href="{% url 'posts:post_list' %}">List</a>
-    </div>
+
 {% endblock %}
