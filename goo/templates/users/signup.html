@@ -1,33 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>Create an Account</h2>
+  <h2>Signup</h2>
   <form method="post">
     {% csrf_token %}
-    <div>
-      <label for="id_username">Username:</label>
-      {{ form.username }}
-    </div>
-    <div>
-      <label for="id_email">Email:</label>
-      {{ form.email }}
-    </div>
-    <div>
-      <label for="id_first_name">First Name:</label>
-      {{ form.first_name }}
-    </div>
-    <div>
-      <label for="id_last_name">Last Name:</label>
-      {{ form.last_name }}
-    </div>
-    <div>
-      <label for="id_password1">Password:</label>
-      {{ form.password1 }}
-    </div>
-    <div>
-      <label for="id_password2">Confirm Password:</label>
-      {{ form.password2 }}
-    </div>
-    <button type="submit">Signup</button>
+    {{ form.as_p }}
+   
+    <button><a href="{% url 'posts:post_list' %}">OK</a></button>
   </form>
 {% endblock %}
+
+

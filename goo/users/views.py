@@ -7,7 +7,7 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("posts:post_list")
+            return redirect("posts:post_list")  # 회원가입 후 게시글 목록으로 이동
     else:
         form = UserCreationForm()
     return render(request, "users/signup.html", {"form": form})
