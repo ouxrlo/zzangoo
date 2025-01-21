@@ -8,8 +8,7 @@
     <ul>
         {% for post in page_obj.object_list %}
             <li>
-                <a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
-                <p>{{ post.content|slice:":100" }}...</p>
+                <input type="checkbox" name="remember_me" id="remember_me"><a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
                 <p>writer: {{ post.author.username }} | Date: {{ post.created_at }}</p>
                 <button><a href="{% url 'posts:post_update' post.id %}">Edit</a></button>
                 <button><a href="{% url 'posts:post_delete' post.id %}">Delete</a></button>
