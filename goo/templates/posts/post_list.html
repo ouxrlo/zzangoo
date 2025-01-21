@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Post List</h1>
 
-    <a href="{% url 'posts:post_create' %}">Create</a>
+    <button><a href="{% url 'posts:post_create' %}">Create</a></button>
 
     <ul>
         {% for post in page_obj.object_list %}
@@ -11,8 +11,8 @@
                 <a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
                 <p>{{ post.content|slice:":100" }}...</p>
                 <p>writer: {{ post.author.username }} | Date: {{ post.created_at }}</p>
-                <a href="{% url 'posts:post_update' post.id %}">Edit</a>
-                <a href="{% url 'posts:post_delete' post.id %}">Delete</a> <!-- 삭제 버튼 -->
+                <button><a href="{% url 'posts:post_update' post.id %}">Edit</a></button>
+                <button><a href="{% url 'posts:post_delete' post.id %}">Delete</a></button>
             </li>
         {% endfor %}
     </ul>
@@ -20,13 +20,13 @@
     <div>
         {% if page_obj.has_previous %}
             <a href="?page=1">&laquo; 첫 페이지</a>
-            <a href="?page={{ page_obj.previous_page_number }}">이전</a>
+            <button><a href="?page={{ page_obj.previous_page_number }}">List</a></button>
         {% endif %}
         
         <span>페이지 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">다음</a>
+        <button><a href="?page={{ page_obj.next_page_number }}">Next</a></button>
             <a href="?page={{ page_obj.paginator.num_pages }}">마지막 페이지 &raquo;</a>
         {% endif %}
     </div>
