@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ user.username }} 의 Profile</h1>
+    <p>사용자 이름: {{ user.username }}</p>
+    <p>이름: {{ user.first_name }} {{ user.last_name }}</p>
+    <p>이메일: {{ user.email }}</p>
+    <p>가입일: {{ user.date_joined }}</p>
+
+    <button><a href="{% url 'users:profile_edit' %}">프로필 수정</a></button>
+{% endblock %}

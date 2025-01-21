@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from .models import CustomUser
 
 User = get_user_model()
 
@@ -11,7 +12,7 @@ class CustomUserCreationForm(UserCreationForm):
     last_name = forms.CharField(max_length=30, required=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "username",
             "email",
@@ -21,11 +22,10 @@ class CustomUserCreationForm(UserCreationForm):
             "password2",
         )
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.first_name = self.cleaned_data["first_name"]
-        user.last_name = self.cleaned_data["last_name"]
-        user.email = self.cleaned_data["email"]
-        if commit:
-            user.save()
-        return user
+
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "profile_picture"]
+
+    profile_picture = forms.ImageField(required=False)
