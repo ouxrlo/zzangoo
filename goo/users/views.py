@@ -21,6 +21,11 @@ def signup(request):
     return render(request, "users/signup.html", {"form": form})
 
 
+def user_profile(request):
+    user = request.user
+    return render(request, "users/profile.html", {"user": user})
+
+
 @login_required
 def profile(request):
     user = request.user

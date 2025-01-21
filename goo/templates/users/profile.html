@@ -1,11 +1,15 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>{{ user.username }}'s Profile</h1>
+    <p>Email: {{ user.email }}</p>
+    <p>First Name: {{ user.first_name }}</p>
+    <p>Last Name: {{ user.last_name }}</p>
+    <p>Joined on: {{ user.date_joined }}</p>
+</body>
+</html>
 
-{% block content %}
-    <h1>{{ user.username }} 의 Profile</h1>
-    <p>사용자 이름: {{ user.username }}</p>
-    <p>이름: {{ user.first_name }} {{ user.last_name }}</p>
-    <p>이메일: {{ user.email }}</p>
-    <p>가입일: {{ user.date_joined }}</p>
-
-    <button><a href="{% url 'users:profile_edit' %}">프로필 수정</a></button>
-{% endblock %}
