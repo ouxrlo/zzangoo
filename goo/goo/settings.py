@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,3 +140,7 @@ SESSION_COOKIE_AGE = 3600  # 1시간 (기본 값: 300초)
 
 # 세션 쿠키가 브라우저를 닫을 때 만료되지 않도록 설정
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

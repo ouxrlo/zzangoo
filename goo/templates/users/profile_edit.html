@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>프로필 수정</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button><a href="{% url 'posts:post_list' %}">OK</a></button>
+<h1>Edit Profile</h1>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button><a href="{% url 'users:user_profile' %}">Changes</a></button>
     </form>
 {% endblock %}

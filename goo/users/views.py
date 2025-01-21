@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 from django.dispatch import receiver
+from .forms import ProfileEditForm
 
 
 def index(request):
@@ -31,6 +32,19 @@ User = get_user_model()
 def user_profile(request):
     user = request.user
     return render(request, "users/profile.html", {"user": user})
+
+
+@login_required
+def profile_edit(request):
+    user = request.user
+    if request.method == "POST":
+        form = ProfileEditForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect("users/profile.html")
+    else:
+        form = ProfileEditForm(instance=user)
+    return render(request, "users/profile_edit.html", {"form": form})
 
 
 def login_view(request):
