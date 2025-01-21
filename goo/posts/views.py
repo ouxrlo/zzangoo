@@ -4,10 +4,6 @@ from .forms import PostForm
 from .models import Post, get_user_model
 
 
-def index(request):
-    return render(request, "posts/index.html")
-
-
 def post_list(request):
     post = Post.objects.all()
     paginator = Paginator(post, 10)
