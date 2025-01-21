@@ -1,0 +1,15 @@
+<!-- posts/templates/posts/post_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Really Delete?</h1>
+
+    <p>Title: {{ post.title }}</p>
+    <p>Content: {{ post.content }}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Delete</button>
+        <a href="{% url 'posts:post_list' %}">Cancel</a>
+    </form>
+{% endblock %}

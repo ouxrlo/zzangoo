@@ -1,21 +1,21 @@
-{% extends 'base.html' %}  
+{% extends 'base.html' %}
 
 {% block content %}
     <h1>Post List</h1>
-    
-    
+
+    <a href="{% url 'posts:post_create' %}">Create</a>
+
     <ul>
         {% for post in page_obj.object_list %}
             <li>
                 <a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
                 <p>{{ post.content|slice:":100" }}...</p>
                 <p>writer: {{ post.author.username }} | Date: {{ post.created_at }}</p>
+                <a href="{% url 'posts:post_update' post.id %}">Edit</a>
+                <a href="{% url 'posts:post_delete' post.id %}">Delete</a> <!-- 삭제 버튼 -->
             </li>
-        {% empty %}
-            <li>No Post.</li>
         {% endfor %}
     </ul>
-
 
     <div>
         {% if page_obj.has_previous %}
