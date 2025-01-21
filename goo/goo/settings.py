@@ -131,3 +131,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
 LOGIN_REDIRECT_URL = "/user_page/"
+
+LOGOUT_REDIRECT_URL = "home"
+
+# 세션 만료 시간 (초 단위, 예: 1시간)
+SESSION_COOKIE_AGE = 3600  # 1시간 (기본 값: 300초)
+
+# 세션 쿠키가 브라우저를 닫을 때 만료되지 않도록 설정
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

@@ -1,10 +1,11 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.signals import user_logged_out
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import get_user_model, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
-from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.dispatch import receiver
 
 
 def index(request):
@@ -59,3 +60,13 @@ def signup_view(request):
     else:
         form = UserCreationForm()
     return render(request, "users/signup.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")
+
+
+@receiver(user_logged_out)
+def handle_user_logged_out(sender, request, user, **kwargs):
+    return redirect("login")
