@@ -25,7 +25,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 class ProfileEditForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ["first_name", "last_name", "profile_picture"]
+        model = get_user_model()
+        fields = ["first_name", "last_name", "email"]
 
     profile_picture = forms.ImageField(required=False)
