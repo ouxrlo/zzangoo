@@ -1,83 +1,117 @@
-from django.contrib.auth.decorators import login_required
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth.forms import AuthenticationForm
+from .forms import CustomUserCreationForm, ProfileEditForm
+from posts.serializers import UserSerializer
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.signals import user_logged_out
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import get_user_model, authenticate, login, logout
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import CustomUserCreationForm
 from django.dispatch import receiver
-from .forms import ProfileEditForm
-
-
-def index(request):
-    return render(request, "users/index.html")
-
-
-def signup(request):
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect("users/profile.html")
-    else:
-        form = CustomUserCreationForm()
-    return render(request, "users/signup.html", {"form": form})
-
 
 User = get_user_model()
 
 
-@login_required
-def user_profile(request):
-    user = request.user
-    return render(request, "users/profile.html", {"user": user})
+# 홈 페이지 뷰
+class IndexView(APIView):
+    def get(self, request):
+        return Response(
+            {"message": "Welcome to the Home page!"}, status=status.HTTP_200_OK
+        )
 
 
-@login_required
-def profile_edit(request):
-    user = request.user
-    if request.method == "POST":
-        form = ProfileEditForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            form.save()
-            return redirect("users/profile.html")
-    else:
-        form = ProfileEditForm(instance=user)
-    return render(request, "users/profile_edit.html", {"form": form})
-
-
-def signup_view(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
+# 회원가입 뷰
+class SignupView(APIView):
+    def post(self, request):
+        form = CustomUserCreationForm(request.data)
         if form.is_valid():
             user = form.save()
+            login(request, user)  # 로그인 후 세션에 사용자 저장
+            return Response(
+                {
+                    "message": "User created and logged in",
+                    "user": UserSerializer(user).data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        form = CustomUserCreationForm()
+        return Response({"form": form.as_p}, status=status.HTTP_200_OK)
+
+
+# 로그인 뷰
+class LoginView(APIView):
+    def post(self, request):
+        form = AuthenticationForm(request, data=request.data)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            return redirect("home")
-    else:
-        form = UserCreationForm()
-    return render(request, "users/signup.html", {"form": form})
+            return Response(
+                {
+                    "message": "Logged in successfully",
+                    "user": UserSerializer(user).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def login_view(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect("home")
-        else:
-            # 로그인 실패 처리
-            pass
-    return render(request, "users/login.html")
+# 사용자 프로필 뷰 (로그인한 사용자만 접근 가능)
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
 
-def logout_view(request):
-    logout(request)
-    return redirect("home")
+# 프로필 수정 뷰 (로그인한 사용자만 접근 가능)
+class ProfileEditView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        form = ProfileEditForm(request.data, instance=user)
+        if form.is_valid():
+            form.save()
+            return Response(
+                {
+                    "message": "Profile updated successfully",
+                    "user": UserSerializer(user).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# 로그아웃 뷰
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response(
+            {"message": "Logged out successfully"}, status=status.HTTP_200_OK
+        )
+
+
+# 로그아웃 후 처리
 @receiver(user_logged_out)
 def handle_user_logged_out(sender, request, user, **kwargs):
-    return redirect("login")
+    return Response(
+        {"message": "User logged out successfully"}, status=status.HTTP_200_OK
+    )
+
+
+# 사용자 리스트 API (예시)
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_list(request):
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

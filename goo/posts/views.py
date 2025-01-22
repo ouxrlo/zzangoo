@@ -1,166 +1,69 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Post, Comment
 from .forms import PostForm
-from .models import Comment, Post, get_user_model
+from .serializers import PostSerializer
 from .serializers import CommentSerializer
 from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-# 댓글 작성 시 인증되지 않은 사용자가 접근하는 경우를 방지 DRF의 권한 체크
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from django.views import View
+from django.urls import reverse
 
 
-@login_required
-def post_list(request):
-    posts = Post.objects.all()
-    paginator = Paginator(posts, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    return render(request, "posts/post_list.html", {"page_obj": page_obj})
+class PostListView(APIView):
+    permission_classes = [IsAuthenticated]
 
-
-@login_required
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, "posts/post_detail.html", {"post": post})
-
-
-@login_required
-def post_like_toggle(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
-    return redirect("posts:post_detail", pk=post.id)
-
-
-@login_required
-def post_create(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = get_user_model().objects.get(id=request.user.id)
-            post.save()
-            return redirect("posts:post_list")
-    else:
-        form = PostForm()
-    return render(request, "posts/post_form.html", {"form": form})
-
-
-@login_required
-def post_update(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-
-    if request.user != post.author:
-        return redirect("posts:post_list")
-
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect("posts:post_list")
-    else:
-        form = PostForm(instance=post)
-    return render(request, "posts/post_form.html", {"form": form})
-
-
-@login_required
-def post_delete(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        post.delete()
-        return redirect("posts:post_list")
-    return render(request, "posts/post_confirm_delete.html", {"post": post})
-
-
-@login_required
-def post_list(request):
-    posts = Post.objects.all()
-    paginator = Paginator(posts, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    return render(request, "posts/post_list.html", {"page_obj": page_obj})
-
-
-@login_required
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, "posts/post_detail.html", {"post": post})
-
-
-@login_required
-def post_like_toggle(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
-    return redirect("posts:post_detail", pk=post.id)
-
-
-@login_required
-def post_create(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = get_user_model().objects.get(id=request.user.id)
-            post.save()
-            return redirect("posts:post_list")
-    else:
-        form = PostForm()
-    return render(request, "posts/post_form.html", {"form": form})
-
-
-@login_required
-def post_update(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-
-    if request.user != post.author:
-        return redirect("posts:post_list")
-
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect("posts:post_list")
-    else:
-        form = PostForm(instance=post)
-    return render(request, "posts/post_form.html", {"form": form})
-
-
-@login_required
-def post_delete(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        post.delete()
-        return redirect("posts:post_list")
-    return render(request, "posts/post_confirm_delete.html", {"post": post})
-
-
-@api_view(["GET", "POST"])
-@permission_classes([IsAuthenticated])
-def comment_list(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-
-    if request.method == "GET":
-        comments = post.comments.all()
-        serializer = CommentSerializer(comments, many=True)
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-    elif request.method == "POST":
-        serializer = CommentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(post=post, author=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# PostDetailView (게시글 상세)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "posts/post_detail.html"
+    context_object_name = "post"
 
 
+# PostCreateView (게시글 작성)
+class PostCreateView(CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = "posts/post_form.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("posts:post_list")
+
+
+# PostUpdateView (게시글 수정)
+class PostUpdateView(UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = "posts/post_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("posts:post_list")
+
+
+# PostDeleteView (게시글 삭제)
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = "posts/post_confirm_delete.html"
+    success_url = reverse_lazy("posts:post_list")
+
+
+# 댓글 작성
 @login_required
 def create_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -170,6 +73,36 @@ def create_comment(request, post_id):
     return redirect("posts:post_detail", pk=post.id)
 
 
+# PostLikeToggleView (게시글 좋아요 토글)
+class PostLikeToggleView(View):
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+        return redirect("posts:post_detail", pk=post.id)
+
+
+class CommentListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        comments = post.comments.all()
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(post=post, author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 댓글 수정
 @login_required
 def update_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -179,6 +112,7 @@ def update_comment(request, comment_id):
     return redirect("posts:post_detail", pk=comment.post.id)
 
 
+# 댓글 삭제
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
