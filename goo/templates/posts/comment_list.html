@@ -1,0 +1,9 @@
+<h1>{{ post.title }}의 댓글 목록</h1>
+
+<ul>
+    {% for comment in comments %}
+        <li>{{ comment.author }}: {{ comment.content }}</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'posts:create_comment' post.id %}">댓글 작성</a>

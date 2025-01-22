@@ -3,28 +3,35 @@
 {% block content %}
     
     <p>작성자: {{ post.author.username }} | 날짜: {{ post.created_at }}</p> 
-   
-
-    {% if request.user in post.likes.all %}
-    <button><a href="{% url 'posts:post_like_toggle' post.id %}">Unlike</a></button>
-{% else %}
-    <button><a href="{% url 'posts:post_like_toggle' post.id %}">Like</a></button>
-{% endif %}
-
+    
+    
     <h1>{{ post.title }}</h1>
     <p>{{ post.content }}</p>
-
+    
     {% for comment in post.comments.all %}
     <div>{{ comment.author }}: {{ comment.content }} ({{ comment.created_at }})</div>
-{% endfor %}
+    {% endfor %}
+    
+    
+    <p>{{ post.likes.count }} likes</p>
 
-<form method="POST" action="{% url 'create_comment' post.id %}">
-    {% csrf_token %}
-    <textarea name="content"></textarea>
-    <button type="submit">댓글 작성</button>
-</form><p>{{ post.likes.count }} likes</p>
-    <a href="{% url 'comment_list' post.id %}">댓글 보기</a>
+    {% if request.user in post.likes.all %}
+<button><a href="{% url 'posts:post_like_toggle' post.id %}">Unlike</a></button>
+{% else %}
+<button><a href="{% url 'posts:post_like_toggle' post.id %}">Like</a></button>
+
+{% endif %}
+    <form method="POST" action="{% url 'posts:create_comment' post.id %}">
+        {% csrf_token %}
+        
 
 
-    <a href="{% url 'posts:post_list' %}">이전</a>
+
+        <textarea name="content"></textarea>
+        <button type="submit">댓글 작성</button>
+    </form>
+
+
+<button><a href="{% url 'posts:post_list' %}">이전</a></button><button><a href="{% url 'posts:comment_list' pk=post.pk %}">댓글 보기</a></button>
+    
 {% endblock %}
