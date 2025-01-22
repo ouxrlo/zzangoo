@@ -33,17 +33,15 @@ class PostDetailView(DetailView):
 
 
 # PostCreateView (게시글 작성)
-class PostCreateView(CreateView):
-    model = Post
-    form_class = PostForm
-    template_name = "posts/post_form.html"
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy("posts:post_list")
+class PostCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=request.user)  # 사용자 지정
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )  # 201 상태 코드 반환
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # PostUpdateView (게시글 수정)
@@ -57,10 +55,11 @@ class PostUpdateView(UpdateView):
 
 
 # PostDeleteView (게시글 삭제)
-class PostDeleteView(DeleteView):
-    model = Post
-    template_name = "posts/post_confirm_delete.html"
-    success_url = reverse_lazy("posts:post_list")
+class PostDeleteView(APIView):
+    def delete(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # 댓글 작성
