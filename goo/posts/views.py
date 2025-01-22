@@ -105,3 +105,10 @@ def update_comment(request, comment_id):
         comment.content = request.POST.get("content")
         comment.save()
     return redirect("post_detail", post_id=comment.post.id)
+
+
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    post_id = comment.post.id
+    comment.delete()
+    return redirect("post_detail", post_id=post_id)
