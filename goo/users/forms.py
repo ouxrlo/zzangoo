@@ -13,19 +13,19 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = (
+        fields = [
             "username",
             "email",
             "first_name",
             "last_name",
             "password1",
             "password2",
-        )
+        ]
 
 
 class ProfileEditForm(forms.ModelForm):
+    profile_picture = forms.ImageField(required=False)
+
     class Meta:
         model = get_user_model()
         fields = ["first_name", "last_name", "email"]
-
-    profile_picture = forms.ImageField(required=False)

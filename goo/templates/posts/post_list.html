@@ -3,18 +3,31 @@
 {% block content %}
     <h1>Post List</h1>
 
-    <button><a href="{% url 'posts:post_create' %}">Create</a></button>
+   
 
     <ul>
         {% for post in page_obj.object_list %}
-            <li>
-                <input type="checkbox" name="remember_me" id="remember_me"><a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
+            
+                <input type="checkbox" name="selected_posts" value="{{ post.id }}" id="post_{{ post.id }}"><a href="{% url 'posts:post_detail' post.id %}">{{ post.title }}</a>
                 <p>writer: {{ post.author.username }} | Date: {{ post.created_at }}</p>
-                <button><a href="{% url 'posts:post_update' post.id %}">Edit</a></button>
-                <button><a href="{% url 'posts:post_delete' post.id %}">Delete</a></button>
-            </li>
+            
         {% endfor %}
     </ul>
+
+
+    <button><a href="{% url 'posts:post_create' %}">Create</a></button>
+
+    {% if page_obj.object_list %}
+        {% if user == page_obj.object_list.0.author %}
+            <button><a href="{% url 'posts:post_update' page_obj.object_list.0.id %}">Edit</a></button>
+            <form action="{% url 'posts:post_delete' page_obj.object_list.0.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Delete</button>
+            </form>
+        {% endif %}
+    {% endif %}
+
+
 
     <div>
         {% if page_obj.has_previous %}
@@ -25,7 +38,7 @@
         <span>페이지 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         
         {% if page_obj.has_next %}
-        <button><a href="?page={{ page_obj.next_page_number }}">Next</a></button>
+            <button><a href="?page={{ page_obj.next_page_number }}">Next</a></button>
             <a href="?page={{ page_obj.paginator.num_pages }}">마지막 페이지 &raquo;</a>
         {% endif %}
     </div>

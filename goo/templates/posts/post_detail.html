@@ -1,8 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    
+    <p>작성자: {{ post.author.username }} | 날짜: {{ post.created_at }}</p> 
+   
+
+    {% if request.user in post.likes.all %}
+    <button><a href="{% url 'posts:post_like_toggle' post.id %}">Unlike</a></button>
+{% else %}
+    <button><a href="{% url 'posts:post_like_toggle' post.id %}">Like</a></button>
+{% endif %}
+
     <h1>{{ post.title }}</h1>
     <p>{{ post.content }}</p>
-    <p>작성자: {{ post.author.username }} | 날짜: {{ post.created_at }}</p>
+
+    <p>{{ post.likes.count }} likes</p>
+
     <a href="{% url 'posts:post_list' %}">이전</a>
 {% endblock %}
