@@ -14,7 +14,17 @@
     <h1>{{ post.title }}</h1>
     <p>{{ post.content }}</p>
 
-    <p>{{ post.likes.count }} likes</p>
+    {% for comment in post.comments.all %}
+    <div>{{ comment.author }}: {{ comment.content }} ({{ comment.created_at }})</div>
+{% endfor %}
+
+<form method="POST" action="{% url 'create_comment' post.id %}">
+    {% csrf_token %}
+    <textarea name="content"></textarea>
+    <button type="submit">댓글 작성</button>
+</form><p>{{ post.likes.count }} likes</p>
+    <a href="{% url 'comment_list' post.id %}">댓글 보기</a>
+
 
     <a href="{% url 'posts:post_list' %}">이전</a>
 {% endblock %}

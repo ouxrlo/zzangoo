@@ -1,8 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .forms import PostForm
-from .models import Post, get_user_model
 from django.contrib.auth.decorators import login_required
+from .forms import PostForm
+from .models import Comment, Post, get_user_model
+from .serializers import CommentSerializer
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 @login_required
@@ -68,3 +72,28 @@ def post_delete(request, pk):
         post.delete()
         return redirect("posts:post_list")
     return render(request, "posts/post_confirm_delete.html", {"post": post})
+
+
+@api_view(["GET", "POST"])
+def comment_list(request, post_id):
+    post = Post.objects.get(id=post_id)
+
+    if request.method == "GET":
+        comments = post.comments.all()
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+    if request.method == "POST":
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(post=post, author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def create_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == "POST":
+        content = request.POST.get("content")
+        Comment.objects.create(post=post, author=request.user, content=content)
+    return redirect("post_detail", post_id=post.id)
