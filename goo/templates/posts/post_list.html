@@ -20,15 +20,20 @@
     {% if page_obj.object_list %}
         {% if user == page_obj.object_list.0.author %}
             <button><a href="{% url 'posts:post_update' page_obj.object_list.0.id %}">Edit</a></button>
-            <form action="{% url 'posts:post_delete' page_obj.object_list.0.id %}" method="post" style="display:inline;">
+            <form action="{% url 'posts:post_delete' page_obj.object_list.0.id %}" method="post">
                 {% csrf_token %}
                 <button type="submit">Delete</button>
+                {% if user.is_authenticated %}
+    <a href="{% url 'users:logout' %}" class="btn btn-danger">Logout</a>
+{% else %}
+    <a href="{% url 'users:login' %}">Login</a>
+{% endif %}
+
             </form>
         {% endif %}
     {% endif %}
 
-
-
+  
     <div>
         {% if page_obj.has_previous %}
             <a href="?page=1">&laquo; 첫 페이지</a>
@@ -40,6 +45,7 @@
         {% if page_obj.has_next %}
             <button><a href="?page={{ page_obj.next_page_number }}">Next</a></button>
             <a href="?page={{ page_obj.paginator.num_pages }}">마지막 페이지 &raquo;</a>
+            
         {% endif %}
     </div>
 {% endblock %}

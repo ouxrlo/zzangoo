@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.signals import user_logged_out
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserCreationForm
@@ -47,23 +47,6 @@ def profile_edit(request):
     return render(request, "users/profile_edit.html", {"form": form})
 
 
-def login_view(request):
-    if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect("user_page")
-        else:
-            messages.error(
-                request,
-                "Please enter a correct username and password. Note that both fields may be case-sensitive.",
-            )
-    else:
-        form = AuthenticationForm()
-    return render(request, "users/login.html", {"form": form})
-
-
 def signup_view(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -74,6 +57,20 @@ def signup_view(request):
     else:
         form = UserCreationForm()
     return render(request, "users/signup.html", {"form": form})
+
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("home")
+        else:
+            # 로그인 실패 처리
+            pass
+    return render(request, "users/login.html")
 
 
 def logout_view(request):
