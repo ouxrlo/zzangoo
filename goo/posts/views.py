@@ -97,3 +97,11 @@ def create_comment(request, post_id):
         content = request.POST.get("content")
         Comment.objects.create(post=post, author=request.user, content=content)
     return redirect("post_detail", post_id=post.id)
+
+
+def update_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.method == "POST":
+        comment.content = request.POST.get("content")
+        comment.save()
+    return redirect("post_detail", post_id=comment.post.id)
