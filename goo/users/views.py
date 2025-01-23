@@ -108,7 +108,6 @@ def handle_user_logged_out(sender, request, user, **kwargs):
     )
 
 
-# 사용자 리스트 API (예시)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def user_list(request):
