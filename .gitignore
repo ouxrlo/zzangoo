@@ -1,4 +1,23 @@
-*.pyc
-pycache/
-db.sqlite3
-/env/
+# Python 관련
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# 환경 설정 파일
+.env
+*.env
+
+# 운영 체제 파일
+.DS_Store
+
+# 가상 환경 폴더
+venv/
+
+
+# 에디터 관련 파일
+.idea/
+.vscode/
+
+# Django static files
+/staticfiles/
+/media/
